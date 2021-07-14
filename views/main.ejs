@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+    integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous" />
+
+  <!-- Font Awesome CSS -->
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+  <link href="/mystyle.css" rel="stylesheet" />
+
+  <title>게시글 목록 조회 페이지</title>
+  <style>
+    .card {
+      cursor: pointer;
+    }
+
+    html {
+      overflow: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-sm navbar-dark bg-sparta justify-content-end">
+    <a class="navbar-brand" href="/">
+      NJS Homework
+    </a>
+    <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="true" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-collapse collapse flex-grow-0 ml-auto" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto text-right">
+        <li class="nav-item" id="link-cart">
+          <a class="nav-link" href="/write">
+            글쓰기<i class="fa fa-pencil fa-fw" aria-hidden="true"></i>
+          </a>
+        </li>
+        <li class="nav-item" id="link-cart">
+          <a class="nav-link" data-toggle="modal" data-target="#signOutModal">
+            로그인, 회원가입<i class="fa fa-sign-out ml-2" aria-hidden="true"></i>
+          </a>
+        </li>
+        <li class="nav-item" id="link-logout">
+          <div class="modal text-left" id="signOutModal" tabindex="-1" role="dialog" aria-labelledby="signOutModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="signOutModalLabel">로그아웃</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  로그인 페이지로 이동하시겠습니까?
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-outline-sparta" data-dismiss="modal">
+                    취소
+                  </button>
+                  <button type="button" class="btn btn-sparta" onclick="signOut()">
+                    이동하기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="wrap">
+    <table id="Table" class="table">
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          <th scope="col">name</th>
+          <th scope="col">title</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template id="table-row">
+          <tr>
+            <th scope="row"></th>
+            <td id="name"></td>
+            <td id="title"></td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+    integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"
+    integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+  <script src="https://cdn.socket.io/socket.io-3.0.1.min.js"></script>
+
+  <script src="/api.js"></script>
+
+  <script>
+
+    //게시글 조회 및 정렬
+    document.addEventListener('DOMContentLoaded', async () => {
+
+      const $tbody = document.querySelector('#Table > tbody')
+      const $template = document.getElementById('table-row')
+
+      const result = await fetch("/api/posts")
+        .then(response => response.json())
+        .then(posts => {
+          posts['result'].forEach(post => {
+            const { title, userId, id } = post
+
+            const clone = document.importNode($template.content, true)
+            clone.querySelector('#name').textContent = userId
+            clone.querySelector('#title').textContent = title
+            clone.querySelector('tr').addEventListener('click', event => {
+              console.log('clicked')
+              // toDetail(_id) 
+              window.location.href=`/detail?${id}`
+
+
+            })
+            $tbody.appendChild(clone)
+
+          });
+        });
+    });
+
+    // function toDetail(id) {
+
+    //     $.ajax({
+    //       type: "GET",
+    //       url: `/api/detail/${id}`,
+    //       success: function (response) {
+    //         window.location.href=`/detail?${id}`
+    //       },
+    //       error: function (error) {
+    //       },
+    //     });
+    //   }
+  </script>
+</body>
+
+</html>
